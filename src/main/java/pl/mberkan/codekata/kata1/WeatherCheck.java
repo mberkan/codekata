@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class WeatherCheck {
 
+    private final WeatherParser weatherParser = new WeatherParser();
+
     static class Measure {
         @Override
         public String toString() {
@@ -33,12 +35,10 @@ public class WeatherCheck {
     }
 
     public static void main(String[] args) throws IOException {
-        readFile()
+        List<String> linesFromFile = readFile();
+        List<Measure> measures = new WeatherParser().parseMeasures(linesFromFile);
+        measures
                 .stream()
-                .skip(2)
-                .filter(l -> l.matches("\\s*\\d+.*"))
-                .map(l -> l.trim().replaceAll("[*]", "").split(" +"))
-                .map(a -> new Measure(Integer.parseInt(a[0]), Integer.parseInt(a[1]), Integer.parseInt(a[2])))
                 .sorted((o1, o2) -> {
                     int diff1 = o1.max - o1.min;
                     int diff2 = o2.max - o2.min;
