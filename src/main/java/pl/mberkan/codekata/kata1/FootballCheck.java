@@ -1,12 +1,21 @@
 package pl.mberkan.codekata.kata1;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Kata example:
+ * <p>
+ * The file football.dat contains the results from the English Premier League for 2001/2. The columns labeled ‘F’
+ * and ‘A’ contain the total number of goals scored for and against each team in that season
+ * (so Arsenal scored 79 goals against opponents, and had 36 goals scored against them). Write a program to print
+ * the name of the team with the smallest difference in ‘for’ and ‘against’ goals.
+ */
 public class FootballCheck {
+
+    private static final String FOOTBALL_DATA_FILENAME = "football.dat";
 
     static class Match {
         String name;
@@ -19,6 +28,7 @@ public class FootballCheck {
                     "name='" + name + '\'' +
                     ", f=" + f +
                     ", a=" + a +
+                    ", absolute difference= " + getForAndAgainstAbsoluteDifference() +
                     '}';
         }
 
@@ -27,25 +37,22 @@ public class FootballCheck {
             this.f = f;
             this.a = a;
         }
+
+        int getForAndAgainstAbsoluteDifference() {
+            return Math.abs(a - f);
+        }
     }
 
     public static void main(String[] args) throws IOException {
-        List<String> linesFromFile = readFile();
-        List<Match> matches = new FootballParser().parseMeasures(linesFromFile);
-        matches
-                .stream()
-                .sorted((o1, o2) -> {
-                    int diffA = o1.a - o2.a;
-                    int diffF = o1.f - o2.f;
-                    return diffF - diffA;
-                })
-                .findFirst().
-                ifPresent(m -> System.out.println(m.name));
+        List<String> linesFromFile = new FileReaderUtil().readFileFromResource(FOOTBALL_DATA_FILENAME);
+        List<Match> matches = new FootballMatchParser().parseMatch(linesFromFile);
+        new FootballCheck().findMatchWithSmallestForAndAgainstDifference(matches)
+                .ifPresent(m -> System.out.println(m.name));
     }
 
-    private static List<String> readFile() throws IOException {
-        return Files.readAllLines(
-                Paths.get("/tmp/football.dat"),
-                Charset.defaultCharset());
+    Optional<Match> findMatchWithSmallestForAndAgainstDifference(List<Match> matches) {
+        return matches.stream()
+                .sorted(Comparator.comparingInt(Match::getForAndAgainstAbsoluteDifference))
+                .findFirst();
     }
 }

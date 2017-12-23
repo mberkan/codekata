@@ -10,24 +10,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Michał Cybulski
  */
-public class WeatherParserTest {
+public class WeatherMeasureParserTest {
 
-    private WeatherParser subject = new WeatherParser();
+    private WeatherMeasureParser subject = new WeatherMeasureParser();
+
 
     @Test
-    public void parseOneLine() {
+    public void checkValidLine() {
         // given
-        ImmutableList<String> lines = ImmutableList.of("1 2 3");
+        String line = "   1  88    59    74          53.8       0.00 F       280  9.6 270  17  1.6  93 23 1004.5";
 
         // when
-        List<WeatherCheck.Measure> measures = subject.parseMeasures(lines);
+        boolean result = subject.validLinePredicate.test(line);
 
         // then
-        assertThat(measures.size()).isEqualTo(1);
-        WeatherCheck.Measure measure = measures.get(0);
-        assertThat(measure.numDay).isEqualTo(1);
-        assertThat(measure.max).isEqualTo(2);
-        assertThat(measure.min).isEqualTo(3);
+        assertThat(result).isTrue();
     }
 
     @Test
